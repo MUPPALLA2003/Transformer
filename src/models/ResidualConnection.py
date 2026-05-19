@@ -14,4 +14,5 @@ class ResidualNetwork(nn.Module):
 
     def forward(self,x:torch.Tensor,sublayer) -> torch.Tensor:
 
-        return x + self.dropout(self.layernorm(sublayer(x)))
+        return self.layernorm(x + self.dropout(sublayer(x)))
+   

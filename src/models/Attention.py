@@ -59,7 +59,7 @@ class Attention(nn.Module):
         q = q.view(B, T_q, self.h, self.d_k).transpose(1, 2)
         k = k.view(B, T_kv, self.h, self.d_k).transpose(1, 2)
         v = v.view(B, T_kv, self.h, self.d_k).transpose(1, 2)
-        out = self.attention(q,k,v,self.mask,self.dropout,key_padding_mask)
+        out = self.attention(q,k,v,self.dropout,key_padding_mask)
         out = out.transpose(1, 2).contiguous().view(B, T_q, C)
 
         return self.W(out)    

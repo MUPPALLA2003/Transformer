@@ -13,4 +13,6 @@ class InputEmbeddings(nn.Module):
 
     def forward(self,x:torch.Tensor):
 
-        x = self.embedding(x) * math.sqrt(self.d_model)    
+        x = self.embedding(x) * math.sqrt(self.d_model)
+
+        return x    

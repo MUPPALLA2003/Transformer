@@ -8,7 +8,7 @@ class FeedForward(nn.Module):
         super().__init__()
         
         hidden_size = d_model * mlp_ratio
-        self.hidden_layer = nn.Linear(d_model,d_model * hidden_size)
+        self.hidden_layer = nn.Linear(d_model,hidden_size)
         self.activation = nn.GELU()
         self.intermediate_dropout = nn.Dropout(hidden_dropout)
         self.output_layer = nn.Linear(hidden_size,d_model)
