@@ -6,6 +6,7 @@ from LayerNorm import LayerNormalization
 from Encoder import Encoder
 from Decoder import Decoder
 from Projection import ProjectionLayer
+from typing import Optional
 class Transformer(nn.Module):
 
     def __init__(self, d_model: int, src_vocabulary_size: int, tgt_vocabulary_size: int,max_seq_len_src:int,max_seq_len_tgt:int,h: int, dropout: float, causal_mask: bool,hidden_dropout: float, output_dropout: float,mlp_ratio: int, N: int, output_vocab_size: int):
@@ -31,6 +32,39 @@ class Transformer(nn.Module):
             if p.dim() > 1:
 
                 nn.init.xavier_uniform_(p)
+
+    def encode(self,src:torch.Tensor,src_mask:Optional[torch.Tensor] = None):
+
+        src = self.wpe_src(self.src_embed(src))
+
+        for layer in self.encoder:
+
+            src = layer(src,src_mask)
+
+        src = self.encoder_norm(src)
+
+        return src    
+    
+    def decode(self,tgt:torch.Tensor,src:torch.Tensor,tgt_mask:Optional[torch.Tensor]=None,src_mask:Optional[torch.Tensor] = None):
+
+        tgt = self.wpe_tgt(self.tgt_embed(tgt))
+
+        for layer in self.decoder:
+
+            tgt = layer(src,tgt,src_mask,tgt_mask)
+
+        tgt = self.decoder_norm(tgt)
+
+        return tgt 
+    
+    def forward(self,src:torch.Tensor,tgt:torch.Tensor,src_mask:Optional[torch.Tensor]=None,tgt_mask:Optional[torch.Tensor]=None):
+
+        src = self.encode(src,src_mask)
+        tgt = self.decode(src,tgt,src_mask,tgt_mask)
+        tgt = self.projection(tgt)
+
+        return tgt
+
 
 
 
