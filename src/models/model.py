@@ -9,19 +9,19 @@ from Projection import ProjectionLayer
 from typing import Optional
 class Transformer(nn.Module):
 
-    def __init__(self, d_model: int, src_vocabulary_size: int, tgt_vocabulary_size: int,max_seq_len_src:int,max_seq_len_tgt:int,h: int, dropout: float, causal_mask: bool,hidden_dropout: float, output_dropout: float,mlp_ratio: int, N: int, output_vocab_size: int):
+    def __init__(self, d_model: int, src_vocabulary_size: int, tgt_vocabulary_size: int,max_seq_len_src:int,max_seq_len_tgt:int,h: int, dropout: float,hidden_dropout: float, output_dropout: float,mlp_ratio: int, N: int):
 
         super().__init__()
 
         self.src_embed = InputEmbeddings(d_model, src_vocabulary_size)
         self.tgt_embed = InputEmbeddings(d_model, tgt_vocabulary_size)
-        self.wpe_src      = PositionalEncoding(d_model, max_seq_len_src, dropout)
-        self.wpe_tgt       = PositionalEncoding(d_model, max_seq_len_tgt, dropout)
-        self.encoder = nn.ModuleList([Encoder(d_model,max_seq_len_src,h,dropout,causal_mask,hidden_dropout,output_dropout,mlp_ratio) for _ in range(N)])
+        self.wpe_src  = PositionalEncoding(d_model, max_seq_len_src, dropout)
+        self.wpe_tgt  = PositionalEncoding(d_model, max_seq_len_tgt, dropout)
+        self.encoder = nn.ModuleList([Encoder(d_model,max_seq_len_src,h,dropout,hidden_dropout,output_dropout,mlp_ratio) for _ in range(N)])
         self.decoder = nn.ModuleList([Decoder(d_model,h,dropout,hidden_dropout,output_dropout,mlp_ratio,max_seq_len_src,max_seq_len_tgt) for _ in range(N)])
         self.encoder_norm = LayerNormalization(d_model)
         self.decoder_norm = LayerNormalization(d_model)
-        self.projection   = ProjectionLayer(d_model,output_vocab_size)
+        self.projection   = ProjectionLayer(d_model,tgt_vocabulary_size)
 
         self._init_weights()
 
@@ -76,7 +76,8 @@ class Transformer(nn.Module):
 
             last_logit = self.decode(src_context,output,src_mask=None,tgt_mask=None)[:,-1,:]
             next_token = self.projection(last_logit).argmax(dim=-1,keepdim=True)                                             
-            output = torch.cat([output,next_token],dim=1)               
+            output = torch.cat([output,next_token],dim=1)
+            print(output)               
  
             if next_token.item() == eos_token_id:
 
@@ -85,6 +86,10 @@ class Transformer(nn.Module):
         return output
 
 
-        
+if __name__ == "__main__":
+    src = torch.randint(0,1000, (1,128))#.to("cuda")
+    model = Transformer(8,1500,2000,128,128,2,0.1,0.1,0.1,4,3)
+    model.inference(src,2,3,25)
+            
 
 
