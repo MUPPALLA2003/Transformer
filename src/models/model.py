@@ -45,7 +45,7 @@ class Transformer(nn.Module):
 
         return src    
     
-    def decode(self,tgt:torch.Tensor,src:torch.Tensor,tgt_mask:Optional[torch.Tensor]=None,src_mask:Optional[torch.Tensor] = None):
+    def decode(self,src:torch.Tensor,tgt:torch.Tensor,src_mask:Optional[torch.Tensor]=None,tgt_mask:Optional[torch.Tensor] = None):
 
         tgt = self.wpe_tgt(self.tgt_embed(tgt))
 
@@ -65,7 +65,24 @@ class Transformer(nn.Module):
 
         return tgt
 
+    @torch.no_grad()
+    def inference(self,src:torch.Tensor,bos_token_id:int,eos_token_id:int,max_seq_len:int):
+        
+        device = src.device
+        src_context = self.encode(src,src_mask=None)                                     
+        output = torch.tensor([bos_token_id],dtype=torch.long,device=device).reshape(1,1)
+ 
+        for _ in range(max_seq_len):
 
+            last_logit = self.decode(src_context,output,src_mask=None,tgt_mask=None)[:,-1,:]
+            next_token = self.projection(last_logit).argmax(dim=-1,keepdim=True)                                             
+            output = torch.cat([output,next_token],dim=1)               
+ 
+            if next_token.item() == eos_token_id:
+
+                break
+ 
+        return output
 
 
         
