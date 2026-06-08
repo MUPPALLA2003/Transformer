@@ -19,9 +19,8 @@ class Transformer(nn.Module):
         self.wpe_tgt  = PositionalEncoding(d_model, max_seq_len_tgt, dropout)
         self.encoder = nn.ModuleList([Encoder(d_model,max_seq_len_src,h,dropout,hidden_dropout,output_dropout,mlp_ratio) for _ in range(N)])
         self.decoder = nn.ModuleList([Decoder(d_model,h,dropout,hidden_dropout,output_dropout,mlp_ratio,max_seq_len_src,max_seq_len_tgt) for _ in range(N)])
-        self.encoder_norm = LayerNormalization(d_model)
-        self.decoder_norm = LayerNormalization(d_model)
         self.projection   = ProjectionLayer(d_model,tgt_vocabulary_size)
+    
 
         self._init_weights()
 
@@ -41,8 +40,6 @@ class Transformer(nn.Module):
 
             src = layer(src,src_mask)
 
-        src = self.encoder_norm(src)
-
         return src    
     
     def decode(self,src:torch.Tensor,tgt:torch.Tensor,src_mask:Optional[torch.Tensor]=None,tgt_mask:Optional[torch.Tensor] = None):
@@ -52,8 +49,6 @@ class Transformer(nn.Module):
         for layer in self.decoder:
 
             tgt = layer(src,tgt,src_mask,tgt_mask)
-
-        tgt = self.decoder_norm(tgt)
 
         return tgt 
     

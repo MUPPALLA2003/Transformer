@@ -1,6 +1,5 @@
 import os
 import glob
-import argparse
 from tokenizers import Tokenizer
 from tokenizers.trainers import WordPieceTrainer
 from tokenizers.models import WordPiece
