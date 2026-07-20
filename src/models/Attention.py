@@ -23,7 +23,7 @@ class Attention(nn.Module):
         if causal:
 
             causal_mask = torch.triu(torch.ones(max_Seq_len,max_Seq_len), diagonal=1).bool()
-            self.register_buffer("causal_mask", causal_mask)
+            self.register_buffer("causal_mask",causal_mask,persistent=False)
 
     def attention(self,q,k,v,dropout=None,key_padding_mask=None):
 

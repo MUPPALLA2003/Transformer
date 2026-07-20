@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
-from InputEmbed import InputEmbeddings
-from PositionalEncoding import PositionalEncoding
-from LayerNorm import LayerNormalization
-from Encoder import Encoder
-from Decoder import Decoder
-from Projection import ProjectionLayer
+from .InputEmbed import InputEmbeddings
+from .PositionalEncoding import PositionalEncoding
+from .Encoder import Encoder
+from .Decoder import Decoder
+from .Projection import ProjectionLayer
 from typing import Optional
 class Transformer(nn.Module):
 
@@ -21,7 +20,6 @@ class Transformer(nn.Module):
         self.decoder = nn.ModuleList([Decoder(d_model,h,dropout,hidden_dropout,output_dropout,mlp_ratio,max_seq_len_src,max_seq_len_tgt) for _ in range(N)])
         self.projection   = ProjectionLayer(d_model,tgt_vocabulary_size)
     
-
         self._init_weights()
 
     def _init_weights(self):
@@ -81,10 +79,7 @@ class Transformer(nn.Module):
         return output
 
 
-if __name__ == "__main__":
-    src = torch.randint(0,1000, (1,128))#.to("cuda")
-    model = Transformer(8,1500,2000,128,128,2,0.1,0.1,0.1,4,3)
-    model.inference(src,2,3,25)
+
             
 
 

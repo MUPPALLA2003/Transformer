@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from Attention import Attention
-from ResidualConnection import ResidualNetwork
-from FeedForwardNN import FeedForward
+from .Attention import Attention
+from .ResidualConnection import ResidualNetwork
+from .FeedForwardNN import FeedForward
 
 class Decoder(nn.Module):
 
