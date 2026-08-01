@@ -1,0 +1,16 @@
+Model:
+
+  d_model : 512
+  src_vocabulary_size : 30522
+  tgt_vocabulary_size : 32000
+  max_seq_len_src : 512
+  max_seq_len_tgt : 512
+  h : 8
+  dropout : 0.1
+  hidden_dropout : 0.1
+  output_dropout : 0.1
+  mlp_ratio : 4
+  N : 6
+  
+
+
