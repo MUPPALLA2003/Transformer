@@ -6,19 +6,25 @@ from .Encoder import Encoder
 from .Decoder import Decoder
 from .Projection import ProjectionLayer
 from typing import Optional
+
 class Transformer(nn.Module):
 
-    def __init__(self, d_model: int, src_vocabulary_size: int, tgt_vocabulary_size: int,max_seq_len_src:int,max_seq_len_tgt:int,h: int, dropout: float,hidden_dropout: float, output_dropout: float,mlp_ratio: int, N: int):
+    def __init__(self,config) -> None:
 
         super().__init__()
 
-        self.src_embed = InputEmbeddings(d_model, src_vocabulary_size)
-        self.tgt_embed = InputEmbeddings(d_model, tgt_vocabulary_size)
-        self.wpe_src  = PositionalEncoding(d_model, max_seq_len_src, dropout)
-        self.wpe_tgt  = PositionalEncoding(d_model, max_seq_len_tgt, dropout)
-        self.encoder = nn.ModuleList([Encoder(d_model,max_seq_len_src,h,dropout,hidden_dropout,output_dropout,mlp_ratio) for _ in range(N)])
-        self.decoder = nn.ModuleList([Decoder(d_model,h,dropout,hidden_dropout,output_dropout,mlp_ratio,max_seq_len_src,max_seq_len_tgt) for _ in range(N)])
-        self.projection   = ProjectionLayer(d_model,tgt_vocabulary_size)
+        self.config = config 
+        self.src_embed = InputEmbeddings(config['Model']['d_model'],config['Model']['src_vocabulary_size'])
+        self.tgt_embed = InputEmbeddings(config['Model']['d_model'],config['Model']['tgt_vocabulary_size'])
+        self.wpe_src  = PositionalEncoding(config['Model']['d_model'],config['Model']['max_seq_len_src'],config['Model']['dropout'])
+        self.wpe_tgt  = PositionalEncoding(config['Model']['d_model'],config['Model']['max_seq_len_tgt'],config['Model']['dropout'])
+        self.encoder = nn.ModuleList(
+            [Encoder(config['Model']['d_model'],config['Model']['max_seq_len_src'],config['Model']['h'],config['Model']['dropout'],config['Model']['hidden_dropout'],config['Model']['output_dropout'],config['Model']['mlp_ratio']) 
+             for _ in range(config['Model']['N'])])                                                                                                                                                                                                                                 
+        self.decoder = nn.ModuleList(
+            [Decoder(config['Model']['d_model'],config['Model']['h'],config['Model']['dropout'],config['Model']['hidden_dropout'],config['Model']['output_dropout'],config['Model']['mlp_ratio'],config['Model']['max_seq_len_src'],config['Model']['max_seq_len_tgt'])
+              for _ in range(config['Model']['N'])])
+        self.projection   = ProjectionLayer(config['Model']['d_model'],config['Model']['tgt_vocabulary_size'])
     
         self._init_weights()
 
@@ -61,6 +67,8 @@ class Transformer(nn.Module):
     @torch.no_grad()
     def inference(self,src:torch.Tensor,bos_token_id:int,eos_token_id:int,max_seq_len:int):
         
+        self.eval()
+
         device = src.device
         src_context = self.encode(src,src_mask=None)                                     
         output = torch.tensor([bos_token_id],dtype=torch.long,device=device).reshape(1,1)

@@ -2,7 +2,6 @@ from functools import partial
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR
 
-
 def _lr_lambda(step: int,d_model: int,warmup_steps: int) -> float:
   
     if d_model <= 0:
